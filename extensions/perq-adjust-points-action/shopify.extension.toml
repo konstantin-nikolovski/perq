@@ -1,0 +1,20 @@
+# /extensions/perq-adjust-points-action/shopify.extension.toml
+[[extensions]]
+type = "flow_action"
+name = "Perq – Adjust loyalty points"
+handle = "perq-adjust-points"
+description = "Add or remove a specific number of points from a customer's loyalty balance."
+runtime_url = "https://spreadlive.myshopify.com/api/flow/adjust-points"
+
+[settings]
+[[settings.fields]]
+type = "customer_reference"
+description = "The customer to adjust points for."
+required = true
+
+[[settings.fields]]
+key = "pointsAdjustment"
+name = "Points adjustment"
+type = "number_integer"
+description = "Positive to add, negative to subtract (e.g., 50 or -20)."
+required = true

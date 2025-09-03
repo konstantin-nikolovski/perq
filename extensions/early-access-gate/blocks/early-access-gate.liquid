@@ -1,0 +1,110 @@
+{%- assign is_gated = false -%}
+{%- assign gating_mode = '' -%}
+{%- assign min_points = 0 -%}
+{%- assign required_tag = '' -%}
+{%- assign resource_title = '' -%}
+{%- assign gating_source = nil -%}
+
+{%- if request.page_type == 'product' -%}
+  {%- assign product_gated_string = product.metafields.custom.loyalty_gated | metafield_text -%}
+  {%- if product_gated_string == 'true' -%}
+    {%- assign gating_source = product -%}
+  {%- else -%}
+    {%- for collection in product.collections -%}
+      {%- assign collection_gated_string = collection.metafields.custom.loyalty_gated | metafield_text -%}
+      {%- if collection_gated_string == 'true' -%}
+        {%- assign gating_source = collection -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- if gating_source != nil -%}
+    {%- assign resource_title = product.title -%}
+  {%- endif -%}
+{%- elsif request.page_type == 'collection' -%}
+  {%- assign collection_gated_string = collection.metafields.custom.loyalty_gated | metafield_text -%}
+  {%- if collection_gated_string == 'true' -%}
+    {%- assign gating_source = collection -%}
+    {%- assign resource_title = collection.title -%}
+  {%- endif -%}
+{%- elsif request.page_type == 'page' -%}
+  {%- assign page_gated_string = page.metafields.custom.loyalty_gated | metafield_text -%}
+  {%- if page_gated_string == 'true' -%}
+    {%- assign gating_source = page -%}
+    {%- assign resource_title = page.title -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- if gating_source != nil -%}
+  {%- assign is_gated = true -%}
+  {%- assign gating_mode = gating_source.metafields.custom.loyalty_gating_mode.value | default: 'points' -%}
+  {%- assign min_points = gating_source.metafields.custom.loyalty_min_points.value | default: 999999 -%}
+  {%- assign required_tag = gating_source.metafields.custom.loyalty_required_tag.value | default: '' -%}
+{%- endif -%}
+
+{%- if is_gated -%}
+  {%- assign customer_points = customer.metafields.custom.loyalty_points.value | default: 0 -%}
+  {%- assign customer_has_tag = false -%}
+  {%- if customer and required_tag != '' and customer.tags contains required_tag -%}
+    {%- assign customer_has_tag = true -%}
+  {%- endif -%}
+
+  {%- assign access_granted = false -%}
+  {%- if gating_mode == 'points' -%}
+    {%- if customer_points >= min_points -%}
+      {%- assign access_granted = true -%}
+    {%- endif -%}
+  {%- elsif gating_mode == 'tag' -%}
+    {%- if customer_has_tag -%}
+      {%- assign access_granted = true -%}
+    {%- endif -%}
+  {%- elsif gating_mode == 'points_or_tag' -%}
+    {%- if customer_points >= min_points or customer_has_tag -%}
+      {%- assign access_granted = true -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- assign customer_is_logged_in = false -%}
+  {%- if customer -%}
+    {%- assign customer_is_logged_in = true -%}
+  {%- endif -%}
+  <script>
+    console.log('--- PERQ GATING DEBUG ---');
+    console.log('Page Type:', {{ request.page_type | json }});
+    console.log('Is Gated:', {{ is_gated | json }});
+    console.log('Gating Mode:', {{ gating_mode | json }});
+    console.log('Min Points:', {{ min_points | json }});
+    console.log('Required Tag:', {{ required_tag | json }});
+    console.log('Customer Logged In:', {{ customer_is_logged_in | json }});
+    console.log('Customer Points:', {{ customer_points | json }});
+    console.log('Customer Has Tag:', {{ customer_has_tag | json }});
+    console.log('Access Granted:', {{ access_granted | json }});
+    console.log('-------------------------');
+  </script>
+
+  {%- if access_granted == false -%}
+        {%- capture params -%}
+      ctx={{ request.page_type }}&title={{ resource_title | url_encode }}&need={{ min_points }}&have={{ customer_points }}&tag={{ required_tag | url_encode }}&mode={{ gating_mode }}&origin={{ request.path | url_encode }}
+      {%- if customer -%}&logged_in=true{%- else -%}&logged_in=false{%- endif -%}
+    {%- endcapture -%}
+    {%- assign redirect_url = '/pages/early-access?' | append: params -%}
+    <script>
+      console.log('[early-access] embed mounted, redirecting...');
+      document.documentElement.style.visibility = 'hidden';
+      window.location.href = {{ redirect_url | json }};
+    </script>
+    <script>
+      console.log('[early-access] embed mounted, redirecting...');
+      document.documentElement.style.visibility = 'hidden';
+      window.location.href = {{ redirect_url | json }};
+    </script>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Early Access Gate",
+  "target": "head",
+  "settings": []
+}
+{% endschema %}

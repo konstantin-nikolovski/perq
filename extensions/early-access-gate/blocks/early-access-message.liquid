@@ -1,0 +1,126 @@
+<link rel="stylesheet" href="{{ 'early-access.css' | asset_url }}">
+<script src="{{ 'early-access.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign button_style = ''
+  if block.settings.button_bg_color != blank
+    assign button_style = button_style | append: 'background-color: ' | append: block.settings.button_bg_color | append: ';'
+  endif
+  if block.settings.button_text_color != blank
+    assign button_style = button_style | append: 'color: ' | append: block.settings.button_text_color | append: ';'
+  endif
+  if block.settings.button_border_radius != blank
+    assign button_style = button_style | append: 'border-radius: ' | append: block.settings.button_border_radius | append: 'px;'
+  endif
+-%}
+
+<div class="early-access-message-section" id="early-access-message-block" data-block-settings='{{ block.settings | json }}'>
+  <h1 id="early-access-title"></h1>
+  <p id="early-access-description"></p>
+
+  <div class="early-access-actions">
+    <button id="early-access-back-button" class="button" style="{{ button_style }}">{{ block.settings.back_button_text }}</button>
+    <a href="/account/login" id="early-access-login-link" class="button" style="{{ button_style }}">{{ block.settings.login_link_text }}</a>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Early Access Message",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title_en",
+      "label": "Title (English)",
+      "default": "Access Restricted"
+    },
+    {
+      "type": "text",
+      "id": "title_de",
+      "label": "Title (German)",
+      "default": "Zugriff Beschränkt"
+    },
+    {
+      "type": "textarea",
+      "id": "description_points_en",
+      "label": "Description (Points - English)",
+      "default": "You need [need] points to access this content. You currently have [have] points. You are missing [missing] points.",
+      "info": "Available placeholders: [need], [have], [missing], [tag]"
+    },
+    {
+      "type": "textarea",
+      "id": "description_points_de",
+      "label": "Description (Points - German)",
+      "default": "Sie benötigen [need] Punkte, um auf diesen Inhalt zuzugreifen. Sie haben derzeit [have] Punkte. Ihnen fehlen [missing] Punkte.",
+      "info": "Available placeholders: [need], [have], [missing], [tag]"
+    },
+    {
+      "type": "textarea",
+      "id": "description_tag_en",
+      "label": "Description (Tag - English)",
+      "default": "You need the tag '[tag]' to access this content.",
+      "info": "Available placeholders: [need], [have], [missing], [tag]"
+    },
+    {
+      "type": "textarea",
+      "id": "description_tag_de",
+      "label": "Description (Tag - German)",
+      "default": "Sie benötigen den Tag '[tag]', um auf diesen Inhalt zuzugreifen.",
+      "info": "Available placeholders: [need], [have], [missing], [tag]"
+    },
+    {
+      "type": "textarea",
+      "id": "description_points_or_tag_en",
+      "label": "Description (Points or Tag - English)",
+      "default": "You need [need] points or the tag '[tag]' to access this content. You currently have [have] points. You are missing [missing] points.",
+      "info": "Available placeholders: [need], [have], [missing], [tag]"
+    },
+    {
+      "type": "textarea",
+      "id": "description_points_or_tag_de",
+      "label": "Description (Points or Tag - German)",
+      "default": "Sie benötigen [need] Punkte oder den Tag '[tag]', um auf diesen Inhalt zuzugreifen. Sie haben derzeit [have] Punkte. Ihnen fehlen [missing] Punkte.",
+      "info": "Available placeholders: [need], [have], [missing], [tag]"
+    },
+    {
+      "type": "text",
+      "id": "back_button_text",
+      "label": "Back Button Text",
+      "default": "Go Back"
+    },
+    {
+      "type": "text",
+      "id": "login_link_text",
+      "label": "Login Link Text",
+      "default": "Login to your account"
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button Background Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Button Border Radius",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    }
+  ]
+}
+{% endschema %}
