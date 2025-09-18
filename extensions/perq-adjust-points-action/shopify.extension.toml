@@ -1,20 +1,13 @@
 # /extensions/perq-adjust-points-action/shopify.extension.toml
-[[extensions]]
+
+# Top‑level extension config (no [[extensions]] array)
+uid = "f8854340-d21e-b79f-a013-8c5ea2e9dc3b7f5b6bf0"
 type = "flow_action"
 name = "Perq – Adjust loyalty points"
 handle = "perq-adjust-points"
 description = "Add or remove a specific number of points from a customer's loyalty balance."
-runtime_url = "https://spreadlive.myshopify.com/api/flow/adjust-points"
 
-[settings]
-[[settings.fields]]
-type = "customer_reference"
-description = "The customer to adjust points for."
-required = true
+# Use your app's public URL for dev/prod. This repo's current dev URL:
+runtime_url = "https://seniors-predictions-cents-lane.trycloudflare.com/api/flow/adjust-points"
 
-[[settings.fields]]
-key = "pointsAdjustment"
-name = "Points adjustment"
-type = "number_integer"
-description = "Positive to add, negative to subtract (e.g., 50 or -20)."
-required = true
+# Settings omitted during build to avoid schema mismatch. Add later via Flow UI.

@@ -2,35 +2,46 @@
 
 client_id = "6d585511b150a5d1cb94c07f276a4414"
 name = "Perq"
-application_url = "https://currently-donate-athens-dash.trycloudflare.com"
+application_url = "https://seniors-predictions-cents-lane.trycloudflare.com"
 embedded = true
 handle = "perq"
 
 [build]
 automatically_update_urls_on_dev = true
-include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-07"
 
   [[webhooks.subscriptions]]
-  topics = [ "app/scopes_update" ]
-  uri = "/webhooks/app/scopes_update"
+  uri = "/webhooks/gdpr"
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
 
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
   uri = "/webhooks/app/uninstalled"
 
   [[webhooks.subscriptions]]
-  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
-  uri = "/webhooks/gdpr"
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+  [[webhooks.subscriptions]]
+  topics = [ "orders/paid" ]
+  uri = "/webhooks/orders/paid"
+
+  [[webhooks.subscriptions]]
+  topics = [ "refunds/create" ]
+  uri = "/webhooks/refunds/create"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_customers,read_orders,write_content,write_customers,write_products"
+scopes = "read_customers,read_discounts,read_orders,write_content,write_customers,write_discounts,write_orders,write_products"
 
 [auth]
-redirect_urls = ["https://currently-donate-athens-dash.trycloudflare.com/auth/callback", "https://currently-donate-athens-dash.trycloudflare.com/auth/shopify/callback", "https://currently-donate-athens-dash.trycloudflare.com/api/auth/callback"]
+redirect_urls = [
+  "https://seniors-predictions-cents-lane.trycloudflare.com/auth/callback",
+  "https://seniors-predictions-cents-lane.trycloudflare.com/auth/shopify/callback",
+  "https://seniors-predictions-cents-lane.trycloudflare.com/api/auth/callback"
+]
 
 [pos]
 embedded = false

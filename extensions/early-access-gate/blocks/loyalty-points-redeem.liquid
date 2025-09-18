@@ -1,0 +1,135 @@
+<link rel="stylesheet" href="{{ 'early-access.css' | asset_url }}">
+
+{%- liquid
+  assign ladder = '[]' | parse_json
+  assign mf = shop.metafields.custom.loyalty_ladder
+  if mf != blank
+    if mf.value != blank
+      assign ladder = mf.value | parse_json
+    else
+      assign ladder = mf | parse_json
+    endif
+  endif
+
+  assign selected_points = cart.attributes.perq_points_redeem | default: ''
+  assign selected_points_num = selected_points | plus: 0
+  assign points_raw = customer.metafields.custom.loyalty_points.value
+  assign customer_points = points_raw | default: 0 | plus: 0
+
+  assign theme_style_setting = shop.metafields.custom.loyalty_theme_style
+  assign theme_style_raw = ''
+  if theme_style_setting != blank
+    if theme_style_setting.value != blank
+      assign theme_style_raw = theme_style_setting.value | downcase
+    else
+      assign theme_style_raw = theme_style_setting | downcase
+    endif
+  endif
+
+  assign theme_style = 'inline'
+  if theme_style_raw == 'dawn' or theme_style_raw == 'sense' or theme_style_raw == 'craft'
+    assign theme_style = theme_style_raw
+  endif
+
+  assign perq_button_classes = 'button perq-button'
+  if theme_style == 'inline'
+    assign perq_button_classes = perq_button_classes | append: ' perq-button--inline'
+  else
+    assign perq_button_classes = perq_button_classes | append: ' perq-button--theme perq-button--' | append: theme_style
+  endif
+-%}
+
+<div class="perq-redeem" id="perq-redeem" data-selected="{{ selected_points }}">
+  <h3>Redeem your points</h3>
+  {%- if customer -%}
+    <p>You have <strong>{{ customer_points }}</strong> points.</p>
+    {%- if ladder.size > 0 -%}
+      <div class="perq-redeem-options" role="list">
+        {%- assign has_valid = false -%}
+        {%- for step in ladder -%}
+          {%- assign pts = step.points | default: 0 | plus: 0 -%}
+          {%- assign stype = step.type | default: 'amount' -%}
+          {%- assign sval = step.value -%}
+          {%- if sval == blank -%}{% assign sval = step.amount %}{%- endif -%}
+          {%- assign amt = sval | default: 0 | plus: 0 -%}
+          {%- if pts > 0 and amt > 0 -%}
+            {%- assign has_valid = true -%}
+            {%- if stype == 'percentage' -%}
+              {%- assign label_value = amt | append: '%' -%}
+            {%- else -%}
+              {%- assign amt_cents = amt | times: 100 -%}
+              {%- assign label_value = amt_cents | money -%}
+            {%- endif -%}
+            {%- assign disabled = false -%}
+            {%- if customer_points < pts -%}{% assign disabled = true %}{%- endif -%}
+            <button
+              class="perq-redeem-option {{ perq_button_classes }}"
+              data-points="{{ pts }}"
+              data-theme-style="{{ theme_style }}"
+              type="button"
+              {% if disabled %}disabled aria-disabled="true"{% endif %}
+              {% if selected_points_num == pts %}data-selected="true"{% endif %}
+            >
+              Redeem {{ pts }} points for {{ label_value }}
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+      {%- unless has_valid -%}
+        <p>No valid redemption options found. Check your ladder JSON keys: use {"points": number, "amount": number}.</p>
+      {%- endunless -%}
+      <div class="perq-redeem-actions">
+        {%- if selected_points != '' -%}
+          <button
+            class="perq-redeem-clear {{ perq_button_classes }} perq-button--clear"
+            data-clear
+            data-theme-style="{{ theme_style }}"
+            type="button"
+          >Remove selection</button>
+        {%- endif -%}
+        <p class="perq-redeem-note">Your discount will apply at checkout.</p>
+      </div>
+    {%- else -%}
+      <p>No redemption options are configured.</p>
+    {%- endif -%}
+  {%- else -%}
+    <p>Please <a href="/account/login">log in</a> to use your points.</p>
+  {%- endif -%}
+</div>
+
+<script>
+  (function() {
+    var root = document.getElementById('perq-redeem');
+    if (!root) return;
+    function setAttr(value) {
+      var body = { attributes: { perq_points_redeem: String(value || '') } };
+      return fetch('/cart/update.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(body)
+      }).then(function(){ location.reload(); });
+    }
+    root.addEventListener('click', function(e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      if (btn.hasAttribute('data-clear')) {
+        e.preventDefault();
+        setAttr('');
+        return;
+      }
+      var pts = btn.getAttribute('data-points');
+      if (!pts) return;
+      e.preventDefault();
+      setAttr(pts);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Loyalty: Redeem Points",
+  "target": "section",
+  "settings": [
+  ]
+}
+{% endschema %}

@@ -1,0 +1,11 @@
+api_version = "2024-07"
+
+name = "points-discount"
+handle = "points-discount"
+type = "function"
+description = "Applies a discount based on a loyalty points ladder."
+
+[[extensions.targeting]]
+target = "cart.lines.discounts.generate.run"
+input_query = "src/input.graphql"
+export = "run"

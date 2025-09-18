@@ -13,7 +13,7 @@
     align-items: center;
 }
 
-.button {
+.perq-button {
     padding: 10px 20px;
     text-decoration: none;
     cursor: pointer;
@@ -22,14 +22,111 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-weight: 600;
+    transition: filter 0.15s ease, transform 0.15s ease;
 }
 
-.button:hover,
-.button:focus {
+.perq-button:hover,
+.perq-button:focus {
     box-shadow: none;
     filter: brightness(1.15);
 }
 
-a.button {
+.perq-button:focus {
+    outline: 3px solid var(--color-outline, rgba(0, 0, 0, 0.35));
+    outline-offset: 1px;
+}
+
+.perq-button--inline {
+    background-color: #111111;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+.perq-button--theme {
+    border-style: solid;
+    border-width: var(--buttons-border-width, 0);
+    border-color: var(--color-button-border, transparent);
+    box-shadow: var(--shadow-button, none);
+}
+
+.perq-button--theme.perq-button--dawn {
+    background-color: var(--color-button, #000000);
+    color: var(--color-button-text, #ffffff);
+    border-radius: var(--buttons-radius, 4px);
+}
+
+.perq-button--theme.perq-button--sense {
+    background-color: var(--color-button, var(--color-button-background, #000000));
+    color: var(--color-button-text, var(--color-foreground, #ffffff));
+    border-radius: var(--buttons-radius, var(--border-radius-button, 4px));
+}
+
+.perq-button--theme.perq-button--craft {
+    background-color: var(--color-button, var(--color-primary, #000000));
+    color: var(--color-button-text, var(--color-foreground, #ffffff));
+    border-radius: var(--buttons-radius, var(--button-border-radius, 4px));
+}
+
+.perq-button--clear {
+    background-color: transparent;
+    color: inherit;
+    border: 1px solid currentColor;
+    box-shadow: none;
+}
+
+.perq-button--inline.perq-button--clear {
+    color: #111111;
+    border-color: #111111;
+}
+
+.perq-button--theme.perq-button--clear {
+    color: var(--color-foreground, var(--color-button-text, #111111));
+    border-color: var(--color-foreground, var(--color-button-text, #111111));
+}
+
+a.perq-button {
     text-decoration: none;
+}
+
+
+.perq-redeem-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin: 16px -8px;
+}
+
+.perq-redeem-option {
+    flex: 1 1 220px;
+    text-align: center;
+    min-width: 180px;
+    max-width: 320px;
+    margin: 0 8px;
+}
+
+.perq-redeem-option[data-selected="true"] {
+    box-shadow: 0 0 0 3px var(--color-outline, rgba(0, 0, 0, 0.25));
+    filter: brightness(1.1);
+}
+
+.perq-redeem-option[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: none;
+}
+
+
+.perq-redeem-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin: 16px -8px 0;
+}
+
+.perq-redeem-note {
+    margin: 0;
+    font-size: 0.9rem;
 }

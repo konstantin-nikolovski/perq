@@ -2,15 +2,39 @@
 <script src="{{ 'early-access.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
+  assign theme_style_setting = shop.metafields.custom.loyalty_theme_style
+  assign theme_style_raw = ''
+  if theme_style_setting != blank
+    if theme_style_setting.value != blank
+      assign theme_style_raw = theme_style_setting.value | downcase
+    else
+      assign theme_style_raw = theme_style_setting | downcase
+    endif
+  endif
+
+  assign theme_style = 'inline'
+  if theme_style_raw == 'dawn' or theme_style_raw == 'sense' or theme_style_raw == 'craft'
+    assign theme_style = theme_style_raw
+  endif
+
   assign button_style = ''
-  if block.settings.button_bg_color != blank
-    assign button_style = button_style | append: 'background-color: ' | append: block.settings.button_bg_color | append: ';'
+  if theme_style == 'inline'
+    if block.settings.button_bg_color != blank
+      assign button_style = button_style | append: 'background-color: ' | append: block.settings.button_bg_color | append: ';'
+    endif
+    if block.settings.button_text_color != blank
+      assign button_style = button_style | append: 'color: ' | append: block.settings.button_text_color | append: ';'
+    endif
+    if block.settings.button_border_radius != blank
+      assign button_style = button_style | append: 'border-radius: ' | append: block.settings.button_border_radius | append: 'px;'
+    endif
   endif
-  if block.settings.button_text_color != blank
-    assign button_style = button_style | append: 'color: ' | append: block.settings.button_text_color | append: ';'
-  endif
-  if block.settings.button_border_radius != blank
-    assign button_style = button_style | append: 'border-radius: ' | append: block.settings.button_border_radius | append: 'px;'
+
+  assign perq_button_classes = 'button perq-button'
+  if theme_style == 'inline'
+    assign perq_button_classes = perq_button_classes | append: ' perq-button--inline'
+  else
+    assign perq_button_classes = perq_button_classes | append: ' perq-button--theme perq-button--' | append: theme_style
   endif
 -%}
 
@@ -19,8 +43,19 @@
   <p id="early-access-description"></p>
 
   <div class="early-access-actions">
-    <button id="early-access-back-button" class="button" style="{{ button_style }}">{{ block.settings.back_button_text }}</button>
-    <a href="/account/login" id="early-access-login-link" class="button" style="{{ button_style }}">{{ block.settings.login_link_text }}</a>
+    <button
+      id="early-access-back-button"
+      class="{{ perq_button_classes }}"
+      {% if button_style != '' %}style="{{ button_style }}"{% endif %}
+      data-theme-style="{{ theme_style }}"
+    >{{ block.settings.back_button_text }}</button>
+    <a
+      href="/account/login"
+      id="early-access-login-link"
+      class="{{ perq_button_classes }}"
+      {% if button_style != '' %}style="{{ button_style }}"{% endif %}
+      data-theme-style="{{ theme_style }}"
+    >{{ block.settings.login_link_text }}</a>
   </div>
 </div>
 

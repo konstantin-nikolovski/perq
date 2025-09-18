@@ -1,0 +1,23 @@
+query Input {
+  cart {
+    attribute(key: "perq_points_redeem") { value }
+    lines {
+      id
+      cost {
+        subtotalAmount {
+          amount
+        }
+      }
+    }
+    buyerIdentity {
+      customer {
+        id
+        metafield(namespace: "custom", key: "loyalty_points") { value }
+      }
+    }
+  }
+  shop {
+    ladder: metafield(namespace: "custom", key: "loyalty_ladder") { value }
+    redeemType: metafield(namespace: "custom", key: "loyalty_redeem_type") { value }
+  }
+}

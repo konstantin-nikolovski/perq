@@ -40,3 +40,5 @@ function getConfig() {
 const config = getConfig();
 
 export default config;
+
+

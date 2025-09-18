@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { Page, Layout, Card, DataTable, Text } from "@shopify/polaris";
+import { Page, Layout, Card, DataTable, Text, InlineGrid, BlockStack } from "@shopify/polaris";
 import { authenticate } from "~/shopify.server";
 
 export const loader = async ({ request }) => {
@@ -43,24 +43,28 @@ export default function PointsPage() {
         </Layout.Section>
 
         <Layout.Section>
-          <Layout.Grid columns={{ sm: 2, lg: 4 }}>
-            <Card>
-              <Text variant="headingMd" as="h2">Points Awarded</Text>
-              <Text variant="bodyLg" as="p">{totals.pointsAwarded}</Text>
-            </Card>
-            <Card>
-              <Text variant="headingMd" as="h2">Points Redeemed</Text>
-              <Text variant="bodyLg" as="p">{totals.pointsRedeemed}</Text>
-            </Card>
-            <Card>
-              <Text variant="headingMd" as="h2">Points Outstanding</Text>
-              <Text variant="bodyLg" as="p">{totals.pointsOutstanding}</Text>
-            </Card>
-            <Card>
-              <Text variant="headingMd" as="h2">Referral Usage</Text>
-              <Text variant="bodyLg" as="p">{totals.referralUsage}</Text>
-            </Card>
-          </Layout.Grid>
+          <Card>
+            <BlockStack gap="200">
+              <InlineGrid columns={4} gap="400">
+                <BlockStack gap="100" align="center">
+                  <Text variant="headingMd" as="h2">Points Awarded</Text>
+                  <Text variant="headingLg" as="p">{totals.pointsAwarded}</Text>
+                </BlockStack>
+                <BlockStack gap="100" align="center">
+                  <Text variant="headingMd" as="h2">Points Redeemed</Text>
+                  <Text variant="headingLg" as="p">{totals.pointsRedeemed}</Text>
+                </BlockStack>
+                <BlockStack gap="100" align="center">
+                  <Text variant="headingMd" as="h2">Points Outstanding</Text>
+                  <Text variant="headingLg" as="p">{totals.pointsOutstanding}</Text>
+                </BlockStack>
+                <BlockStack gap="100" align="center">
+                  <Text variant="headingMd" as="h2">Referral Usage</Text>
+                  <Text variant="headingLg" as="p">{totals.referralUsage}</Text>
+                </BlockStack>
+              </InlineGrid>
+            </BlockStack>
+          </Card>
         </Layout.Section>
 
         <Layout.Section>

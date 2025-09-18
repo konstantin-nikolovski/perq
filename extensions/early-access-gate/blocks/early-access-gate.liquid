@@ -93,11 +93,6 @@
       document.documentElement.style.visibility = 'hidden';
       window.location.href = {{ redirect_url | json }};
     </script>
-    <script>
-      console.log('[early-access] embed mounted, redirecting...');
-      document.documentElement.style.visibility = 'hidden';
-      window.location.href = {{ redirect_url | json }};
-    </script>
   {%- endif -%}
 {%- endif -%}
 

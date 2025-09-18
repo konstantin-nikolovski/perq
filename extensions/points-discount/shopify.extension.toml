@@ -1,0 +1,16 @@
+api_version = "2025-07"
+
+[[extensions]]
+name = "points-discount"
+handle = "points-discount"
+uid = "4fcc0602-f093-f50a-8c23-2da5a7855068190b5e55"
+type = "function"
+description = "Applies a discount based on a loyalty points ladder."
+
+[[extensions.targeting]]
+target = "cart.lines.discounts.generate.run"
+input_query = "src/input.graphql"
+export = "run"
+
+[extensions.build]
+path = "dist/index.wasm"

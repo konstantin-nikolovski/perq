@@ -1,0 +1,26 @@
+{%- if customer -%}
+  {%- assign points = customer.metafields.custom.loyalty_points.value | default: 0 -%}
+  {%- assign tier = customer.metafields.custom.loyalty_tier.value | default: '' -%}
+  <div class="perq-loyalty-points-balance" role="region" aria-label="Loyalty points">
+    <h3 class="perq-loyalty-title">Your loyalty points</h3>
+    <p class="perq-loyalty-points"><strong>{{ points }}</strong> points</p>
+    {%- if tier != '' -%}
+      <p class="perq-loyalty-tier">Tier: {{ tier }}</p>
+    {%- endif -%}
+  </div>
+{%- else -%}
+  <div class="perq-loyalty-points-balance" role="region" aria-label="Loyalty points">
+    <p>Please log in to see your loyalty points.</p>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Loyalty Points Balance",
+  "target": "section",
+  "settings": [
+    {"type": "text", "id": "heading", "label": "Heading", "default": "Your loyalty points"}
+  ]
+}
+{% endschema %}
+

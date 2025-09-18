@@ -1,79 +1,42 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import crypto from "crypto";
 import { authenticate } from "~/shopify.server";
+import { adjustCustomerPoints } from "~/services/loyalty.server";
 
-// The GraphQL mutation to update a customer's metafield
-const UPDATE_CUSTOMER_POINTS_MUTATION = `#graphql
-  mutation UpdateCustomerMetafield($customerId: ID!, $metafield: MetafieldInput!) {
-    customerUpdate(input: {id: $customerId, metafields: [$metafield]}) {
-      customer {
-        id
-        metafield(namespace: "custom", key: "loyalty_points") {
-          value
-        }
-      }
-      userErrors {
-        field
-        message
-      }
+function normalizeCustomerId(raw: unknown): string | null {
+  if (!raw) return null;
+  if (typeof raw === "string") {
+    if (raw.startsWith("gid://")) return raw;
+    if (raw.trim() !== "") {
+      return `gid://shopify/Customer/${raw.trim()}`;
     }
-  }`;
+  }
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return `gid://shopify/Customer/${raw}`;
+  }
+  return null;
+}
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
+  try {
+    const { admin } = await authenticate.admin(request);
 
-  // 1. Verify the request is from Shopify
-  const hmac = request.headers.get("x-shopify-hmac-sha256");
-  const body = await request.text();
-  const secret = process.env.SHOPIFY_API_SECRET;
-
-  if (!secret) {
-    console.error("Shopify API secret is not set.");
-    return json({ error: "Internal server error" }, { status: 500 });
-  }
-
-  const hash = crypto
-    .createHmac("sha256", secret)
-    .update(body, "utf8")
-    .digest("base64");
-
-  if (hash !== hmac) {
-    return json({ error: "HMAC validation failed" }, { status: 401 });
-  }
-
-  // 2. Parse the incoming data from Flow
-  const flowData = JSON.parse(body);
-  const customerId = flowData.customerId;
-  const pointsAdjustment = parseInt(flowData.pointsAdjustment, 10);
-
-  if (!customerId || isNaN(pointsAdjustment)) {
-    return json({ error: "Invalid input data" }, { status: 400 });
-  }
-
-  // 3. TODO: Implement the logic to fetch the customer's current points,
-  // calculate the new total, and then update the metafield.
-  // For now, we will just log the intended action.
-  console.log(
-    `TODO: Adjust points for customer ${customerId} by ${pointsAdjustment}`,
-  );
-
-  // Example of how you would call the mutation (to be completed):
-  /*
-  const response = await admin.graphql(UPDATE_CUSTOMER_POINTS_MUTATION, {
-    variables: {
-      customerId: `gid://shopify/Customer/${customerId}`,
-      metafield: {
-        namespace: "custom",
-        key: "loyalty_points",
-        type: "number_integer",
-        value: "... new calculated value ..."
-      }
+    if (!admin) {
+      return json({ message: "Unauthorized" }, { status: 401 });
     }
-  });
-  const result = await response.json();
-  */
 
-  // 4. Respond to Shopify
-  return json({ success: true });
+    const body = await request.json();
+    const customerGid = normalizeCustomerId(body?.customerId);
+    const pointsAdjustment = Number.isInteger(body?.pointsAdjustment) ? body.pointsAdjustment : undefined;
+    if (!customerGid || typeof pointsAdjustment !== 'number') {
+      return json({ message: "Invalid request payload" }, { status: 400 });
+    }
+
+    const newPoints = await adjustCustomerPoints(admin, customerGid, pointsAdjustment);
+
+    return json({ message: "Points adjusted", newPoints });
+  } catch (error) {
+    console.error("adjust-points error:", error);
+    return json({ message: "Internal server error" }, { status: 500 });
+  }
 };
