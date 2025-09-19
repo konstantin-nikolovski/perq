@@ -7,7 +7,47 @@ name = "Perq – Adjust loyalty points"
 handle = "perq-adjust-points"
 description = "Add or remove a specific number of points from a customer's loyalty balance."
 
-# Use your app's public URL for dev/prod. This repo's current dev URL:
-runtime_url = "https://seniors-predictions-cents-lane.trycloudflare.com/api/flow/adjust-points"
+# Use your app's public URL for dev/prod. This repo deploys to app.perq.app:
+runtime_url = "https://savings-terrorists-invest-catalogue.trycloudflare.com/api/flow/adjust-points"
 
-# Settings omitted during build to avoid schema mismatch. Add later via Flow UI.
+[settings]
+
+[[settings.fields]]
+type = "customer_reference"
+description = "Customer whose loyalty balance will change."
+required = true
+
+[[settings.fields]]
+type = "number_integer"
+key = "points_adjustment"
+name = "Points adjustment"
+description = "Positive to award points, negative to remove points."
+required = false
+
+[[settings.fields]]
+type = "single_line_text_field"
+key = "points_mode"
+name = "Points mode"
+description = "Leave blank for fixed. Or enter per_currency / per_quantity to calculate dynamically."
+required = false
+
+[[settings.fields]]
+type = "number_decimal"
+key = "multiplier"
+name = "Points multiplier"
+description = "Points per unit when using dynamic modes (defaults to 1)."
+required = false
+
+[[settings.fields]]
+type = "single_line_text_field"
+key = "currency_path"
+name = "Currency amount path"
+description = "Dot path to the amount in the Flow payload (e.g., order.current_total_price_set.shop_money.amount)."
+required = false
+
+[[settings.fields]]
+type = "single_line_text_field"
+key = "quantity_path"
+name = "Quantity path"
+description = "Dot path to the quantity in the Flow payload (e.g., order.line_items_subtotal_quantity)."
+required = false

@@ -39,9 +39,6 @@ importers:
       '@shopify/app-bridge-react':
         specifier: ^4.1.6
         version: 4.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@shopify/cli':
-        specifier: ^3.84.1
-        version: 3.84.1
       '@shopify/polaris':
         specifier: ^12.0.0
         version: 12.27.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -70,6 +67,9 @@ importers:
       '@graphql-codegen/cli':
         specifier: ^6.0.0
         version: 6.0.0(@parcel/watcher@2.5.1)(@types/node@22.18.0)(graphql@16.11.0)(typescript@5.9.2)
+      '@shopify/cli':
+        specifier: ^3.84.1
+        version: 3.84.1
       '@graphql-codegen/typescript':
         specifier: ^5.0.0
         version: 5.0.0(graphql@16.11.0)

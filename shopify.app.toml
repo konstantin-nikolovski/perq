@@ -2,7 +2,7 @@
 
 client_id = "6d585511b150a5d1cb94c07f276a4414"
 name = "Perq"
-application_url = "https://seniors-predictions-cents-lane.trycloudflare.com"
+application_url = "https://app.perq.app"
 embedded = true
 handle = "perq"
 
@@ -38,9 +38,9 @@ scopes = "read_customers,read_discounts,read_orders,write_content,write_customer
 
 [auth]
 redirect_urls = [
-  "https://seniors-predictions-cents-lane.trycloudflare.com/auth/callback",
-  "https://seniors-predictions-cents-lane.trycloudflare.com/auth/shopify/callback",
-  "https://seniors-predictions-cents-lane.trycloudflare.com/api/auth/callback"
+  "https://app.perq.app/auth/callback",
+  "https://app.perq.app/auth/shopify/callback",
+  "https://app.perq.app/api/auth/callback"
 ]
 
 [pos]

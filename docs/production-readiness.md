@@ -6,16 +6,22 @@ This playbook walks through every change required to ship Perq to the Shopify Ap
 
 ## 0. Baseline & Tooling
 1. **Adopt pnpm everywhere**
-   - Replace `npm` invocations in `Dockerfile` and `shopify.web.toml` with pnpm equivalents.
-   - Commit a working `pnpm-lock.yaml` update after `pnpm install`.
-   - Verify `pnpm lint` and `pnpm build` succeed locally.
+   - Enable Corepack (`corepack enable`) and add a `"packageManager": "pnpm@<current-version>"` entry to `package.json` so contributors default to pnpm.
+   - Remove `package-lock.json*` handling and update `Dockerfile` to install with pnpm: copy `pnpm-lock.yaml`, run `pnpm install --prod --frozen-lockfile`, prune CLI-only deps, and switch the container `CMD` to `pnpm run docker-start`.
+   - Replace all `npm`/`npx` usages in repo scripts with pnpm equivalents (e.g., `docker-start` → `pnpm run setup && pnpm run start`, `predev` → `pnpm prisma generate`).
+   - Update `shopify.web.toml` command hooks to pnpm (`pnpm prisma generate`, `pnpm prisma migrate deploy && pnpm remix vite:dev`).
+   - Regenerate and commit `pnpm-lock.yaml`, then run `pnpm lint`, `pnpm build`, and `pnpm shopify app dev` locally to confirm parity.
 2. **Environment hygiene**
-   - Remove tunnel URLs from tracked config (`shopify.app.toml`, extension manifests) and move dev URLs to `.env`.
-   - Add `env.example` documenting required variables (`SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET`, `SHOPIFY_APP_URL`, `DATABASE_URL`, `SCOPES`, etc.).
-3. **Database migration**
-   - Provision a managed Postgres instance (e.g., Fly.io, Render, Railway).
-   - Update `prisma/schema.prisma` datasource to use Postgres connection string.
-   - Run `pnpm prisma migrate deploy` against Postgres; ensure migrations succeed.
+   - Replace the Cloudflare tunnel URLs in tracked config (`shopify.app.toml`, `extensions/perq-adjust-points-action/shopify.extension.toml`) with the production hostname (e.g., `https://app.perq.app`) and keep dev tunnel URLs in untracked `.env.*` files.
+   - Add `.env.example` enumerating required variables (`SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET`, `SHOPIFY_APP_URL`, `DATABASE_URL`, `SCOPES`, `SHOPIFY_APP_HANDLE`, `SHOPIFY_API_VERSION`, etc.) and mirror the list in `docs/SETUP.md`.
+   - Update `.env`/deployment secrets so Remix, discount functions, and Flow action all source the same `SHOPIFY_APP_URL`, `DATABASE_URL`, and Flow endpoints; note that `shopify app env pull`/`push` should be run via `pnpm shopify`.
+   - Sweep `extensions/*` for any remaining hard-coded dev URLs or secrets (Liquid blocks, extension manifests) and replace them with settings or environment bindings.
+3. **Database migration (SQLite → Postgres)**
+   - Provision managed Postgres (Fly.io, Render, Railway, Neon, Supabase, etc.) and store credentials in the host secret manager plus `.env`/`.env.example`.
+   - Update `prisma/schema.prisma` to use `provider = "postgresql"` with `url = env("DATABASE_URL")`; remove references to `prisma/dev.sqlite` from the schema and app code.
+   - Delete `prisma/dev.sqlite` (add to `.gitignore`) to prevent accidental fallbacks to SQLite during development.
+   - Create and apply the initial Postgres migration (`pnpm prisma migrate diff --from-empty --to-schema-datamodel ./prisma/schema.prisma --script`, then `pnpm prisma migrate deploy`) and regenerate the Prisma client (`pnpm prisma generate`).
+   - Verify Remix boots, OAuth installs, and session storage works against Postgres locally and inside the Docker image (`pnpm run docker-start`) before promoting the change.
 
 ---
 

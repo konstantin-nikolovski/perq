@@ -6,6 +6,21 @@ This document outlines the Shopify Flow recipes to set up point awarding and tie
 
 ---
 
+## Configuring the Perq Flow action
+
+When you add the **Perq – Adjust loyalty points** action inside Shopify Flow you can tailor how many points get awarded:
+
+- **Customer** – required. Pick the customer whose balance should change.
+- **Points mode** – leave blank to award a fixed amount, or set to `per_currency` / `per_quantity` (underscores optional) for dynamic logic.
+- **Points adjustment** – required for the fixed mode. Enter the exact number of points to add (negative values subtract).
+- **Points multiplier** – optional. Defaults to `1`. For dynamic modes this is the number of points per unit (e.g., `2` for two points per €1 or per item).
+- **Currency amount path** – only for `per_currency`. Either insert a Flow variable (e.g., `{{ order.current_total_price_set.shop_money.amount }}`) or type the dot path to the monetary amount (e.g., `order.current_total_price_set.shop_money.amount`).
+- **Quantity path** – only for `per_quantity`. Insert a Flow variable or path to the quantity value (e.g., `{{ order.line_items_subtotal_quantity }}` or `order.line_items_subtotal_quantity`).
+
+> Tip: Use Flow's preview to inspect the payload and copy the field names. Amounts typically appear as strings—Perq converts them to numbers before applying the multiplier and rounding down to an integer.
+
+---
+
 ## 1. Award Points for Newsletter Subscription
 
 This flow awards a fixed number of points (e.g., 50) when a customer subscribes to your newsletter.
@@ -19,17 +34,9 @@ This flow awards a fixed number of points (e.g., 50) when a customer subscribes 
     *   **Metafield:** `customer.metafields.custom.loyalty_points` (Number Integer)
     *   **Value:** `{{ customer.metafields.custom.loyalty_points.value | default: 0 | plus: 50 }}`
         *   *Explanation:* This gets the current loyalty points (defaulting to 0 if none exist) and adds 50.
-3.  **Call HTTP webhook** (to notify your app of the change and trigger any internal logic/analytics)
-    *   **Method:** `POST`
-    *   **URL:** `YOUR_APP_BASE_URL/api/flow/adjust-points` (Replace `YOUR_APP_BASE_URL` with your app's actual base URL)
-    *   **Request body:**
-        ```json
-        {
-          "customerId": "{{ customer.id }}",
-          "pointsAdjustment": 50
-        }
-        ```
-    *   **Content type:** `application/json`
+3.  **Perq Flow action:** add **Perq – Adjust loyalty points**.
+    *   Leave **Points mode** blank (defaults to fixed).
+    *   Enter the number of points in **Points adjustment** (e.g., `50`).
 
 ---
 
@@ -48,17 +55,10 @@ This flow awards points equal to the quantity of items purchased in an order.
     *   **Metafield:** `customer.metafields.custom.loyalty_points` (Number Integer)
     *   **Value:** `{{ customer.metafields.custom.loyalty_points.value | default: 0 | plus: order.line_items_subtotal_quantity }}`
         *   *Explanation:* Adds the total quantity of line items in the order to the customer's current points.
-3.  **Call HTTP webhook**
-    *   **Method:** `POST`
-    *   **URL:** `YOUR_APP_BASE_URL/api/flow/adjust-points`
-    *   **Request body:**
-        ```json
-        {
-          "customerId": "{{ customer.id }}",
-          "pointsAdjustment": {{ order.line_items_subtotal_quantity }}
-        }
-        ```
-    *   **Content type:** `application/json`
+3.  **Perq Flow action:** add **Perq – Adjust loyalty points**.
+    *   Set **Points mode** to `per_quantity`.
+    *   Set **Quantity path** to `order.line_items_subtotal_quantity` (or the field your trigger exposes).
+    *   Optionally set **Points multiplier** to award more than one point per item.
 
 ---
 
@@ -77,17 +77,10 @@ This flow awards points equal to the floor of the amount spent on an order (e.g.
     *   **Metafield:** `customer.metafields.custom.loyalty_points` (Number Integer)
     *   **Value:** `{{ customer.metafields.custom.loyalty_points.value | default: 0 | plus: order.total_price | floor }}`
         *   *Explanation:* Adds the floor of the order's total price to the customer's current points.
-3.  **Call HTTP webhook**
-    *   **Method:** `POST`
-    *   **URL:** `YOUR_APP_BASE_URL/api/flow/adjust-points`
-    *   **Request body:**
-        ```json
-        {
-          "customerId": "{{ customer.id }}",
-          "pointsAdjustment": {{ order.total_price | floor }}
-        }
-        ```
-    *   **Content type:** `application/json`
+3.  **Perq Flow action:** add **Perq – Adjust loyalty points**.
+    *   Set **Points mode** to `per_currency`.
+    *   Set **Currency amount path** to the amount you care about (insert the Flow token, e.g., `{{ order.current_subtotal_price_set.shop_money.amount }}`, or type the path `order.current_subtotal_price_set.shop_money.amount`).
+    *   Set **Points multiplier** to the number of points per currency unit (e.g., `1` = one point per €1, `0.5` = half a point per currency unit).
 
 ---
 
